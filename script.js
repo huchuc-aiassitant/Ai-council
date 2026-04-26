@@ -1,52 +1,98 @@
-const KEY = "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";
+const KEY = "11/30 610
+sk-or-v1-e2b1025d4c74b8aed50ad72e652a6ab3";
 
 const agents = [
   {
     name: "🔬 Phân tích",
-    sys: "Phân tích logic, ngắn gọn 4 câu"
+    sys: "Bạn là nhà phân tích. Trả lời logic, rõ ràng, 4-6 câu."
   },
   {
     name: "⚠️ Phản biện",
-    sys: "Chỉ ra rủi ro, phản biện mạnh"
+    sys: "Bạn là người phản biện. Chỉ ra rủi ro, mặt trái, hạn chế."
   },
   {
     name: "💡 Sáng tạo",
-    sys: "Đưa ý tưởng mới"
+    sys: "Bạn là người sáng tạo. Đưa ra ý tưởng mới, giải pháp khác biệt."
   }
 ];
 
-async function ask(sys, topic) {
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${KEY}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: "deepseek/deepseek-chat",
-      messages: [
-  
-        { role: "user", content: topic }
-      ]
-    })
-  });
+// ========================
+// UI helper
+// ========================
+function addMessage(title, content) {
+  const feed = document.getElementById("feed");
 
-  const data = await res.json();
-  return data.choices[0].message.content;
+  const div = document.createElement("div");
+  div.className = "msg";
+
+  div.innerHTML = `
+    <b>${title}</b><br/>
+    <div>${content}</div>
+  `;
+
+  feed.appendChild(div);
 }
 
+// ========================
+// CALL OPENROUTER (IMPORTANT)
+// ========================
+async function askAI(system, user) {
+  try {
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + KEY,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "deepseek/deepseek-chat",
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user }
+        ]
+      })
+    });
+
+    const text = await res.text();
+
+    console.log("STATUS:", res.status);
+    console.log("RAW RESPONSE:", text);
+
+    if (!res.ok) {
+      return `❌ Lỗi API (${res.status}): ${text}`;
+    }
+
+    const data = JSON.parse(text);
+
+    return data.choices?.[0]?.message?.content || "❌ Không có nội dung trả về";
+
+  } catch (err) {
+    console.error("FETCH ERROR:", err);
+    return "❌ Lỗi kết nối: " + err.message;
+  }
+}
+
+// ========================
+// MAIN FUNCTION
+// ========================
 async function go() {
   const topic = document.getElementById("topic").value;
+
+  if (!topic) {
+    alert("Nhập chủ đề trước!");
+    return;
+  }
+
   const feed = document.getElementById("feed");
   feed.innerHTML = "";
 
-  for (let a of agents) {
-    const res = await ask(a.sys, topic);
+  addMessage("📌 Chủ đề", topic);
 
-    const div = document.createElement("div");
-    div.className = "msg";
-    div.innerHTML = `<b>${a.name}</b><br>${res}`;
+  for (let agent of agents) {
+    addMessage(agent.name, "⏳ Đang xử lý...");
 
-    feed.appendChild(div);
+    const response = await askAI(agent.sys, topic);
+
+    addMessage(agent.name, response);
   }
 }
