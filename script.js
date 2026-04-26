@@ -1,4 +1,4 @@
-const KEY = "DÁN_API_KEY_VÀO_ĐÂY";
+const KEY = "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";
 
 const agents = [
   {
