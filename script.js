@@ -25,7 +25,7 @@ async function ask(sys, topic) {
     body: JSON.stringify({
       model: "deepseek/deepseek-chat",
       messages: [
-        { role: "system", content: sys },
+  
         { role: "user", content: topic }
       ]
     })
