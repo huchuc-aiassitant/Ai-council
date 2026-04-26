@@ -1,4 +1,4 @@
-const KEY = "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";
+const KEY = "sk-fea2d5d483784a0280f06ad194b6844c";
 
 const agents = [
   {
