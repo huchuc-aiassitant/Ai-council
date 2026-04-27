@@ -56,21 +56,23 @@ async function askAI(system, user) {
     const text = await res.text();
 
     console.log("STATUS:", res.status);
-    console.log("RAW RESPONSE:", text);
+    console.log("RESPONSE:", text);
 
     if (!res.ok) {
-      return `❌ Lỗi API (${res.status}): ${text}`;
+      return "❌ API lỗi: " + text;
     }
 
     const data = JSON.parse(text);
 
-    return data.choices?.[0]?.message?.content || "❌ Không có nội dung trả về";
+    return data.choices?.[0]?.message?.content || "❌ Không có dữ liệu";
 
   } catch (err) {
-    console.error("FETCH ERROR:", err);
-    return "❌ Lỗi kết nối: " + err.message;
+    console.log("ERROR:", err);
+    return "❌ Lỗi hệ thống: " + err.message;
   }
 }
+          
+  
 
 // ========================
 // MAIN FUNCTION
